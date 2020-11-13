@@ -1,15 +1,16 @@
 import MetalKit;
 
 class GameView: MTKView {
+    
+    struct Vertex{
+        var position: SIMD3<Float>
+        var color: SIMD4<Float>
+    }
 
     var commandQueue :MTLCommandQueue!
     var renderPipelineState: MTLRenderPipelineState!
     
-    let vertices: [SIMD3<Float>] = [
-        SIMD3<Float>(0,1,0),
-        SIMD3<Float>(-1,-1,0),
-        SIMD3<Float>(1,-1,0)
-    ]
+    var vertices: [Vertex]!
     
     var currentTime = 0;
     
@@ -25,12 +26,21 @@ class GameView: MTKView {
         
         createRenderPipelineState();
         
+        createVertices();
+        
         createBuffers();
     }
     
+    func createVertices(){
+        vertices = [
+            Vertex(position: SIMD3<Float>(0,1,0), color: SIMD4<Float>(1,0,0,1)),
+            Vertex(position: SIMD3<Float>(-1,-1,0), color: SIMD4<Float>(0,1,0,1)),
+            Vertex(position: SIMD3<Float>(1,-1,0), color: SIMD4<Float>(0,0,1,1))
+        ]
+    }
+    
     func createBuffers(){
-        vertexBuffer = self.device?.makeBuffer(bytes: vertices, length: MemoryLayout<SIMD3<Float>>.stride*vertices.count, options: [])
-        fragmentBuffer = self.device?.makeBuffer(bytes: <#T##UnsafeRawPointer#>, length: <#T##Int#>, options: <#T##MTLResourceOptions#>)
+        vertexBuffer = self.device?.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride*vertices.count, options: [])
     }
     
     func createRenderPipelineState(){
@@ -61,8 +71,6 @@ class GameView: MTKView {
         //send info to render command encoder
         renderCommandEncoder?.setVertexBuffer(vertexBuffer,offset: 0,index: 0)
         renderCommandEncoder?.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
-        
-        renderCommandEncoder?.setFragmentBuffer(<#T##buffer: MTLBuffer?##MTLBuffer?#>, offset: <#T##Int#>, index: <#T##Int#>)
         
         renderCommandEncoder?.endEncoding()
         commandBuffer?.present(drawable)
